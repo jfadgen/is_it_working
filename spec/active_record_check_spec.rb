@@ -13,8 +13,8 @@ describe IsItWorking::ActiveRecordCheck do
     ActiveRecord::Base.stub(connection: connection)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
-    status.should be_success
-    status.messages.first.message.should == "ActiveRecord::Base.connection is active"
+    expect(status).to be_success
+    expect(status.messages.first.message).to eq "ActiveRecord::Base.connection is active"
   end
   
   it "allows specifying the class to check the connection for" do
@@ -23,8 +23,8 @@ describe IsItWorking::ActiveRecordCheck do
     IsItWorking::TestActiveRecord.stub(connection: connection)
     check = IsItWorking::ActiveRecordCheck.new(:class => IsItWorking::TestActiveRecord)
     check.call(status)
-    status.should be_success
-    status.messages.first.message.should == "IsItWorking::TestActiveRecord.connection is active"
+    expect(status).to be_success
+    expect(status.messages.first.message).to eq "IsItWorking::TestActiveRecord.connection is active"
   end
 
   it "succeeds if the ActiveRecord connection can be reconnected" do
@@ -35,8 +35,8 @@ describe IsItWorking::ActiveRecordCheck do
     ActiveRecord::Base.stub(connection: connection)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
-    status.should be_success
-    status.messages.first.message.should == "ActiveRecord::Base.connection is active"
+    expect(status).to be_success
+    expect(status.messages.first.message).to eq "ActiveRecord::Base.connection is active"
   end
 
   it "fails if the ActiveRecord connection is not active" do
@@ -46,8 +46,8 @@ describe IsItWorking::ActiveRecordCheck do
     ActiveRecord::Base.stub(connection: connection)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
-    status.should_not be_success
-    status.messages.first.message.should == "ActiveRecord::Base.connection is not active"
+    expect(status).not_to be_success
+    expect(status.messages.first.message).to eq "ActiveRecord::Base.connection is not active"
   end
 
   # Use a real database, with as little stubbing as possible
@@ -69,8 +69,8 @@ describe IsItWorking::ActiveRecordCheck do
       model_class = make_ar_klass
       check = IsItWorking::ActiveRecordCheck.new(class: model_class)
       check.call(status)
-      status.should be_success
-      status.messages.first.message.should == "#{model_class_name}.connection is active"
+      expect(status).to be_success
+      expect(status.messages.first.message).to eq "#{model_class_name}.connection is active"
     end
 
     it "fails on dead connection" do
@@ -79,8 +79,8 @@ describe IsItWorking::ActiveRecordCheck do
       model_class.connection.stub(:verify!)
       check = IsItWorking::ActiveRecordCheck.new(class: model_class)
       check.call(status)
-      status.should_not be_success
-      status.messages.first.message.should == "#{model_class_name}.connection is not active"
+      expect(status).not_to be_success
+      expect(status.messages.first.message).to eq "#{model_class_name}.connection is not active"
     end
   end
 end

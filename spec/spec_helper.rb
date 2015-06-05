@@ -1,4 +1,3 @@
-require 'rubygems'
 begin
   require 'simplecov'
   SimpleCov.start do

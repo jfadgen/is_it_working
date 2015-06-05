@@ -69,7 +69,6 @@ module IsItWorking
     # * <tt>:active_record</tt> - Check if the database connection for an ActiveRecord class is up
     # * <tt>:dalli</tt> - DalliCheck checks if all the servers in a MemCache cluster are available using dalli
     # * <tt>:directory</tt> - DirectoryCheck checks for the accessibilty of a file system directory
-    # * <tt>:memcache</tt> - MemcacheCheck checks if all the servers in a MemCache cluster are available using memcache-client
     # * <tt>:ping</tt> - Check if a host is reachable and accepting connections on a port
     # * <tt>:url</tt> - Check if a getting a URL returns a success response
     def check (name, *options_or_check, &block)

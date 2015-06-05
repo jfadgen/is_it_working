@@ -19,8 +19,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'actionmailer', '>= 3.2', '< 4.3'
   spec.add_development_dependency 'activerecord', '>= 3.2', '< 4.3'
 
-  # TODO memcached-client hasn't been updated since 2010; should we drop support?
-  spec.add_development_dependency 'memcache-client', '>= 0'
   spec.add_development_dependency 'dalli', '>= 0'
   spec.add_development_dependency 'sqlite3'
 
