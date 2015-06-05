@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   # TODO memcached-client hasn't been updated since 2010; should we drop support?
   spec.add_development_dependency 'memcache-client', '>= 0'
   spec.add_development_dependency 'dalli', '>= 0'
+  spec.add_development_dependency 'sqlite3'
 
   spec.add_development_dependency 'rspec'    , '~> 2.99.0'
   spec.add_development_dependency 'webmock'  , '~> 1.7.7'
