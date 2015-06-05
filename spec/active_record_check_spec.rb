@@ -8,9 +8,9 @@ describe IsItWorking::ActiveRecordCheck do
   end
   
   it "should succeed if the ActiveRecord connection is active" do
-    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(mock(:connection))
+    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
     connection.reconnect!
-    ActiveRecord::Base.stub!(:connection).and_return(connection)
+    ActiveRecord::Base.stub(connection: connection)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
     status.should be_success
@@ -18,9 +18,9 @@ describe IsItWorking::ActiveRecordCheck do
   end
   
   it "should allow specifying the class to check the connection for" do
-    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(mock(:connection))
+    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
     connection.reconnect!
-    IsItWorking::TestActiveRecord.stub!(:connection).and_return(connection)
+    IsItWorking::TestActiveRecord.stub(connection: connection)
     check = IsItWorking::ActiveRecordCheck.new(:class => IsItWorking::TestActiveRecord)
     check.call(status)
     status.should be_success
@@ -28,9 +28,9 @@ describe IsItWorking::ActiveRecordCheck do
   end
 
   it "should succeed if the ActiveRecord connection can be reconnected" do
-    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(mock(:connection))
+    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
     connection.disconnect!
-    ActiveRecord::Base.stub!(:connection).and_return(connection)
+    ActiveRecord::Base.stub(connection: connection)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
     status.should be_success
@@ -38,10 +38,10 @@ describe IsItWorking::ActiveRecordCheck do
   end
 
   it "should fail if the ActiveRecord connection is not active" do
-    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(mock(:connection))
+    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
     connection.disconnect!
-    connection.stub!(:verify!)
-    ActiveRecord::Base.stub!(:connection).and_return(connection)
+    connection.stub(:verify!)
+    ActiveRecord::Base.stub(connection: connection)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
     status.should_not be_success

@@ -7,7 +7,7 @@ describe IsItWorking::ActionMailerCheck do
   it "should succeed if the default mail host is accepting connections" do
     ActionMailer::Base.smtp_settings[:address] = 'localhost'
     ActionMailer::Base.smtp_settings[:port] = 25
-    TCPSocket.should_receive(:new).with('localhost', 25).and_return(mock(:socket, :close => true))
+    TCPSocket.should_receive(:new).with('localhost', 25).and_return(double(:socket, :close => true))
     check = IsItWorking::ActionMailerCheck.new
     check.call(status)
     status.should be_success
@@ -30,7 +30,7 @@ describe IsItWorking::ActionMailerCheck do
     
     IsItWorking::ActionMailerCheck::Tester.smtp_settings[:address] = 'mail.example.com'
     IsItWorking::ActionMailerCheck::Tester.smtp_settings[:port] = 'smtp'
-    TCPSocket.should_receive(:new).with('mail.example.com', 'smtp').and_return(mock(:socket, :close => true))
+    TCPSocket.should_receive(:new).with('mail.example.com', 'smtp').and_return(double(:socket, :close => true))
     check = IsItWorking::ActionMailerCheck.new(:class => IsItWorking::ActionMailerCheck::Tester)
     check.call(status)
     status.should be_success
@@ -40,7 +40,7 @@ describe IsItWorking::ActionMailerCheck do
   it "should allow aliasing the ActionMailer host alias" do
     ActionMailer::Base.smtp_settings[:address] = 'localhost'
     ActionMailer::Base.smtp_settings[:port] = 25
-    TCPSocket.should_receive(:new).with('localhost', 25).and_return(mock(:socket, :close => true))
+    TCPSocket.should_receive(:new).with('localhost', 25).and_return(double(:socket, :close => true))
     check = IsItWorking::ActionMailerCheck.new(:alias => "smtp host")
     check.call(status)
     status.should be_success

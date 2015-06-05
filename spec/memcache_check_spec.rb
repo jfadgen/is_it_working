@@ -8,8 +8,8 @@ describe IsItWorking::MemcacheCheck do
   
   it "should succeed if all servers are responding" do
     check = IsItWorking::MemcacheCheck.new(:cache => memcache)
-    servers.first.should_receive(:socket).and_return(mock(:socket))
-    servers.last.should_receive(:socket).and_return(mock(:socket))
+    servers.first.should_receive(:socket).and_return(double(:socket))
+    servers.last.should_receive(:socket).and_return(double(:socket))
     check.call(status)
     status.should be_success
     status.messages.first.message.should == "cache-1.example.com:11211 is available"
@@ -18,7 +18,7 @@ describe IsItWorking::MemcacheCheck do
 
   it "should fail if any server is not responding" do
     check = IsItWorking::MemcacheCheck.new(:cache => memcache)
-    servers.first.should_receive(:socket).and_return(mock(:socket))
+    servers.first.should_receive(:socket).and_return(double(:socket))
     servers.last.should_receive(:socket).and_return(nil)
     check.call(status)
     status.should_not be_success
@@ -30,8 +30,8 @@ describe IsItWorking::MemcacheCheck do
     require 'active_support/cache'
     rails_cache = ActiveSupport::Cache::MemCacheStore.new(memcache)
     check = IsItWorking::MemcacheCheck.new(:cache => rails_cache)
-    servers.first.should_receive(:socket).and_return(mock(:socket))
-    servers.last.should_receive(:socket).and_return(mock(:socket))
+    servers.first.should_receive(:socket).and_return(double(:socket))
+    servers.last.should_receive(:socket).and_return(double(:socket))
     check.call(status)
     status.should be_success
     status.messages.first.message.should == "cache-1.example.com:11211 is available"
@@ -40,8 +40,8 @@ describe IsItWorking::MemcacheCheck do
 
   it "should be able to alias the memcache host names in the output" do
     check = IsItWorking::MemcacheCheck.new(:cache => memcache, :alias => "memcache")
-    servers.first.should_receive(:socket).and_return(mock(:socket))
-    servers.last.should_receive(:socket).and_return(mock(:socket))
+    servers.first.should_receive(:socket).and_return(double(:socket))
+    servers.last.should_receive(:socket).and_return(double(:socket))
     check.call(status)
     status.should be_success
     status.messages.first.message.should == "memcache 1 is available"
