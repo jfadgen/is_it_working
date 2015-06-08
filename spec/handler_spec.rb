@@ -137,4 +137,121 @@ describe IsItWorking::Handler do
     handler.hostname = "woot"
     handler.call("PATH_INFO" => "/is_it_working").last.join("").should include("woot")
   end
+
+  # NOTE: these tests are only to document existing behavior, not actual requirements.
+  context "Adding filters:" do
+    let(:handler) do
+      described_class.allocate.tap do |h|
+        h.instance_variable_set(:@filters, filters)
+      end
+    end
+    let(:opts) { {myopt: 'myval'.freeze}.freeze }
+    let(:opts_with_async) { {async: true}.merge(opts).freeze }
+    let(:opts_without_async) { {async: false}.merge(opts).freeze }
+    let(:filters) { [] }
+    let(:ck_name) { :look_me_up }
+    let(:looked_up_check) { double(:looked_up_check) }
+    let(:example_full_desc) { RSpec.current_example.full_description.dup.freeze }
+    let(:passed_proc) { proc{|stat| example_full_desc } }
+
+    before :each do
+      handler.stub(:lookup_check) { raise 'Unexpected lookup_check call' }
+    end
+
+    context "check(name, &block)" do
+      it "uses block as check" do
+        handler.check(ck_name, &passed_proc)
+        expect(filters[0].name).to eq ck_name
+        expect(filters[0].instance_variable_get(:@check).call(nil)).to eq example_full_desc
+        expect(filters[0].async).to be true
+      end
+
+      context "check(name, options, &block)" do
+        it "allows disabling of async" do
+          handler.check(ck_name, async: false, &passed_proc)
+          expect(filters[0].name).to eq ck_name
+          expect(filters[0].instance_variable_get(:@check).call(nil)).to eq example_full_desc
+          expect(filters[0].async).to be false
+        end
+      end
+    end
+
+    context "check(name, options)" do
+      it "uses looked-up class with passed-in options" do
+        handler.should_receive(:lookup_check).with(ck_name, opts_with_async).and_return looked_up_check
+        handler.check(ck_name, opts)
+        expect(filters[0].name).to eq ck_name
+        expect(filters[0].instance_variable_get(:@check)).to be looked_up_check
+        expect(filters[0].async).to be true
+      end
+
+      it "allows disabling of async" do
+        handler.should_receive(:lookup_check).with(ck_name, opts_without_async).and_return looked_up_check
+        handler.check(ck_name, opts_without_async)
+        expect(filters[0].name).to eq ck_name
+        expect(filters[0].instance_variable_get(:@check)).to be looked_up_check
+        expect(filters[0].async).to be false
+      end
+    end
+
+    context "check(name, check)" do
+      it "uses passed-in check" do
+        handler.check(ck_name, passed_proc)
+        expect(filters[0].name).to eq ck_name
+        expect(filters[0].instance_variable_get(:@check)).to be passed_proc
+        expect(filters[0].async).to be true
+      end
+
+      it "ignores block" do
+        handler.check(ck_name, passed_proc) { raise "don't call me" }
+        expect(filters[0].name).to eq ck_name
+        expect(filters[0].instance_variable_get(:@check)).to be passed_proc
+        expect(filters[0].async).to be true
+      end
+
+      context "check(name, check, options)" do
+        it "allows disabling of async" do
+          handler.check(ck_name, passed_proc, opts_without_async)
+          expect(filters[0].name).to eq ck_name
+          expect(filters[0].instance_variable_get(:@check)).to be passed_proc
+          expect(filters[0].async).to be false
+        end
+      end
+    end
+
+  end
+
+  context "lookup_check (non-public)" do
+    let(:handler) { described_class.allocate }
+    let(:check_data) do
+      [
+        [:action_mailer, IsItWorking::ActionMailerCheck],
+        [:active_record, IsItWorking::ActiveRecordCheck],
+        [:dalli,         IsItWorking::DalliCheck       ],
+        [:directory,     IsItWorking::DirectoryCheck   ],
+        [:ping,          IsItWorking::PingCheck        ],
+        [:url,           IsItWorking::UrlCheck         ],
+      ].each_with_object(Hash.new) do |(ck_name, ck_class), map|
+        map[ck_name] = {
+          class:    ck_class,
+          opts:     double("#{ck_name} opts"),
+          instance: double("#{ck_class} instance")
+        }
+      end
+    end
+
+    it "works for built-in check classes" do
+      check_data.each do |ck_name, data|
+        data[:class].should_receive(:new).with(data[:opts]).and_return data[:instance]
+      end
+
+      check_data.each do |ck_name, data|
+        expect(handler.send(:lookup_check, ck_name, data[:opts])).to be data[:instance]
+      end
+    end
+
+    it "raises on undefined check class" do
+      expect{ handler.send(:lookup_check, :foobar, {}) }.to raise_error(/Check not defined FoobarCheck/i)
+    end
+  end
 end
