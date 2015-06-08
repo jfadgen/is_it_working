@@ -25,8 +25,8 @@ A monitoring handler for this set up could be set up in <tt>config/initializers/
     # Check the ActiveRecord database connection without spawning a new thread
     h.check :active_record, :async => false
     
-    # Check the memcache servers used by Rails.cache if using the MemCacheStore implementation
-    h.check :memcache, :cache => Rails.cache if Rails.cache.is_a?(ActiveSupport::Cache::MemCacheStore)
+    # Check the memcache servers used by Rails.cache if using the DalliStore implementation
+    h.check :dalli, :cache => Rails.cache if defined?(ActiveSupport::Cache::DalliStore) && Rails.cache.is_a?(ActiveSupport::Cache::DalliStore)
     
     # Check that the web service is working by hitting a known URL with Basic authentication
     h.check :url, :get => "http://api.example.com/version", :username => "appname", :password => "abc123"
@@ -49,6 +49,8 @@ A monitoring handler for this set up could be set up in <tt>config/initializers/
       end
     end
   end
+
+See <tt>IsItWorking::Handler#check</tt> for built-in handlers.
 
 == Output
 
