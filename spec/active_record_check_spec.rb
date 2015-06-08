@@ -3,14 +3,16 @@ require 'spec_helper'
 describe IsItWorking::ActiveRecordCheck do
 
   let(:status){ IsItWorking::Status.new(:active_record) }
+  let(:abstract_conn) do
+    ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
+  end
 
   class IsItWorking::TestActiveRecord < ActiveRecord::Base
   end
   
   it "succeeds if the ActiveRecord connection is active" do
-    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
-    connection.stub(active?: true)
-    ActiveRecord::Base.stub(connection: connection)
+    abstract_conn.stub(active?: true)
+    ActiveRecord::Base.stub(connection: abstract_conn)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
     expect(status).to be_success
@@ -18,9 +20,8 @@ describe IsItWorking::ActiveRecordCheck do
   end
   
   it "allows specifying the class to check the connection for" do
-    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
-    connection.stub(active?: true)
-    IsItWorking::TestActiveRecord.stub(connection: connection)
+    abstract_conn.stub(active?: true)
+    IsItWorking::TestActiveRecord.stub(connection: abstract_conn)
     check = IsItWorking::ActiveRecordCheck.new(:class => IsItWorking::TestActiveRecord)
     check.call(status)
     expect(status).to be_success
@@ -28,11 +29,10 @@ describe IsItWorking::ActiveRecordCheck do
   end
 
   it "succeeds if the ActiveRecord connection can be reconnected" do
-    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
     # On Rails 4, calling `disconnect!` puts the adapter in a weird state that can't be restored with `verify!`. Using `reconnect!` is ok.
-    connection.reconnect!
-    connection.stub(active?: true)
-    ActiveRecord::Base.stub(connection: connection)
+    abstract_conn.reconnect!
+    abstract_conn.stub(active?: true)
+    ActiveRecord::Base.stub(connection: abstract_conn)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
     expect(status).to be_success
@@ -40,10 +40,9 @@ describe IsItWorking::ActiveRecordCheck do
   end
 
   it "fails if the ActiveRecord connection is not active" do
-    connection = ActiveRecord::ConnectionAdapters::AbstractAdapter.new(double(:connection))
-    connection.disconnect!
-    connection.stub(:verify!)
-    ActiveRecord::Base.stub(connection: connection)
+    abstract_conn.disconnect!
+    abstract_conn.stub(:verify!)
+    ActiveRecord::Base.stub(connection: abstract_conn)
     check = IsItWorking::ActiveRecordCheck.new
     check.call(status)
     expect(status).not_to be_success
@@ -66,7 +65,6 @@ describe IsItWorking::ActiveRecordCheck do
     end
 
     it "succeeds on active connection" do
-      model_class = make_ar_klass
       check = IsItWorking::ActiveRecordCheck.new(class: model_class)
       check.call(status)
       expect(status).to be_success
@@ -74,7 +72,6 @@ describe IsItWorking::ActiveRecordCheck do
     end
 
     it "fails on dead connection" do
-      model_class = make_ar_klass
       model_class.connection.disconnect!
       model_class.connection.stub(:verify!)
       check = IsItWorking::ActiveRecordCheck.new(class: model_class)
