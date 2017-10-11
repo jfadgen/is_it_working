@@ -11,6 +11,7 @@
   [ '4.0', '~> 4.0.0' ],
   [ '4.1', '~> 4.1.0' ],
   [ '4.2', '~> 4.2.0' ],
+  [ '5.0', '~> 5.0.0' ],
 ].each do |ver_name, ver_req|
   appraise "rails_#{ver_name}" do
     gem 'actionmailer', ver_req
