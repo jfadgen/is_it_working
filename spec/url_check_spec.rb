@@ -134,7 +134,7 @@ describe IsItWorking::UrlCheck do
     Net::HTTP.should_receive(:new).with('localhost', 80).and_return(http)
     request = Net::HTTP::Get.new("/test?a=1")
     Net::HTTP::Get.should_receive(:new).with("/test?a=1", {}).and_return(request)
-    http.should_receive(:start).and_raise(TimeoutError)
+    http.should_receive(:start).and_raise(Timeout::Error)
 
     check = IsItWorking::UrlCheck.new(:get => "http://localhost/test?a=1", :open_timeout => 1, :read_timeout => 2)
     check.call(status)
